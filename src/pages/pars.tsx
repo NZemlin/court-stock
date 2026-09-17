@@ -3,9 +3,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useInventory } from "@/lib/inventory/store";
-import { isConsumable } from "@/lib/inventory/logic";
+import { isFoodDrink, isIceCream } from "@/lib/inventory/types";
 import { downloadText } from "@/lib/utils";
 import type { SiteId } from "@/lib/inventory/types";
+
 
 export function ParsPage() {
   const [query, setQuery] = useState("");
@@ -21,7 +22,8 @@ export function ParsPage() {
   const rows = useMemo(
     () =>
       catalog.filter((i) => {
-        if (foodOnly && !isConsumable(i)) return false;
+        if (isIceCream(i)) return false;
+        if (foodOnly && !isFoodDrink(i)) return false;
         if (query && !i.name.toLowerCase().includes(query.toLowerCase())) return false;
         return true;
       }),
@@ -46,7 +48,7 @@ export function ParsPage() {
         <h1 className="mt-1 font-display text-4xl font-medium tracking-tight">Par levels</h1>
         <p className="mt-2 max-w-2xl text-muted">
           Reorder when on-hand is below the point; order up to target, in pack-size multiples.
-          Ice cream starts at target 0 (freezer off). Set a target to bring it back.
+          Ice cream is a separate vendor — totals live on the board, not here.
         </p>
       </header>
 
@@ -70,7 +72,7 @@ export function ParsPage() {
           <Button
             variant="secondary"
             onClick={() => {
-              downloadText("court-stock-backup.json", exportBackup(), "application/json");
+              downloadText("btg-stock-backup.json", exportBackup(), "application/json");
               toast.success("Backup downloaded");
             }}
           >

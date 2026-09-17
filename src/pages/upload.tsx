@@ -6,6 +6,7 @@ import type { SiteId } from "@/lib/inventory/types";
 import { SITES } from "@/lib/inventory/types";
 import { formatQty } from "@/lib/utils";
 
+
 export function UploadPage() {
   const [site, setSite] = useState<SiteId>("bjk");
   const snapshots = useInventory((s) => s.snapshots);
@@ -16,7 +17,7 @@ export function UploadPage() {
         <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted">Refresh</p>
         <h1 className="mt-1 font-display text-4xl font-medium tracking-tight">Upload export</h1>
         <p className="mt-2 text-muted">
-          Drop the retail items CSV from the club software. On-hand quantities update for that
+          Drop the retail items CSV from ClubAutomation. On-hand quantities update for that
           desk; par levels stay as you set them.
         </p>
       </header>

@@ -59,7 +59,7 @@ export function CsvDropzone({
         <div>
           <p className="font-medium">Drop a retail items CSV</p>
           <p className="mt-1 max-w-sm text-sm text-muted">
-            CourtReserve export. Filename with “bjk” or “eldo” is assigned automatically.
+            ClubAutomation export. Filename with “bjk” or “eldo” is assigned automatically.
           </p>
         </div>
         <Button type="button" variant="secondary" onClick={() => inputRef.current?.click()}>

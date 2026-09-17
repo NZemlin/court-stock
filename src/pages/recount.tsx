@@ -4,12 +4,16 @@ import { SiteToggle } from "@/components/SiteToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useInventory } from "@/lib/inventory/store";
-import type { SiteId } from "@/lib/inventory/types";
+import type { RecountScope, SiteId } from "@/lib/inventory/types";
+import { isDeskRecount } from "@/lib/inventory/types";
 import { buildVariances } from "@/lib/inventory/logic";
+import { cn } from "@/lib/utils";
 import { downloadText, formatQty, formatSignedMoney } from "@/lib/utils";
+
 
 export function RecountPage() {
   const [site, setSite] = useState<SiteId>("bjk");
+  const [scope, setScope] = useState<RecountScope>("desk");
   const [query, setQuery] = useState("");
   const [onlyDiff, setOnlyDiff] = useState(false);
   const catalog = useInventory((s) => s.catalog);
@@ -18,7 +22,11 @@ export function RecountPage() {
   const setCount = useInventory((s) => s.setCount);
   const clearRecount = useInventory((s) => s.clearRecount);
 
-  const tracked = catalog.filter((i) => i.trackQty);
+  const tracked = catalog.filter((i) => {
+    if (!i.trackQty) return false;
+    if (scope === "desk" && !isDeskRecount(i)) return false;
+    return true;
+  });
   const filtered = tracked.filter((i) => {
     if (query && !i.name.toLowerCase().includes(query.toLowerCase()) && !i.category.toLowerCase().includes(query.toLowerCase())) {
       return false;
@@ -26,9 +34,10 @@ export function RecountPage() {
     return true;
   });
 
+  const scopeItems = catalog.filter((i) => i.trackQty && (scope === "full" || isDeskRecount(i)));
   const variances = useMemo(
-    () => (snap ? buildVariances(catalog, snap.rows, counts) : []),
-    [catalog, snap, counts],
+    () => (snap ? buildVariances(scopeItems, snap.rows, counts) : []),
+    [scopeItems, snap, counts],
   );
   const diffs = variances.filter((v) => v.variance !== 0);
   const filled = variances.length;
@@ -47,6 +56,7 @@ export function RecountPage() {
   function exportAdjustments() {
     const payload = {
       site,
+      scope,
       counted_on: new Date().toISOString().slice(0, 10),
       file: snap?.fileName,
       adjustments: diffs.map((r) => ({
@@ -70,7 +80,7 @@ export function RecountPage() {
       ),
     ].join("\n");
     downloadText(`recount_${site}_${payload.counted_on}.csv`, csv, "text/csv");
-    toast.success("Downloaded POS adjustment files");
+    toast.success("Downloaded ClubAutomation adjustment files");
   }
 
   return (
@@ -80,12 +90,41 @@ export function RecountPage() {
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted">Physical</p>
           <h1 className="mt-1 font-display text-4xl font-medium tracking-tight">Recount</h1>
           <p className="mt-2 max-w-xl text-muted">
-            Walk the cooler and pro shop. Type what you see. Blank rows are skipped. Then
-            download the adjustment list for CourtReserve stock adjustment.
+            Walk the desk, type what you see. Blank rows are skipped. Then download the
+            adjustment list for ClubAutomation stock adjustment.
           </p>
         </div>
         <SiteToggle value={site} onChange={setSite} />
       </header>
+
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="inline-flex h-11 rounded-md border border-border bg-card p-1">
+          {(
+            [
+              { id: "desk", label: "Desk" },
+              { id: "full", label: "Full shop" },
+            ] as const
+          ).map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setScope(opt.id)}
+              className={cn(
+                "min-w-24 rounded-sm px-4 text-sm font-medium transition-colors duration-150",
+                scope === opt.id ? "bg-accent text-accent-fg" : "text-muted hover:text-ink",
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <p className="max-w-xl text-sm text-muted">
+          {scope === "desk"
+            ? "Strings, grips, dampeners, balls, snacks, drinks, ice cream, sunscreen. Not bags, shoes, racquets, or apparel."
+            : "Every tracked SKU, including bags, shoes, and racquets."}{" "}
+          {tracked.length} items.
+        </p>
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-4">
         <Metric label="Counted" value={String(filled)} />
@@ -137,8 +176,7 @@ export function RecountPage() {
               const sys = snap?.rows[item.name]?.qty ?? 0;
               const entry = counts[item.name];
               const counted = entry?.counted ?? "";
-              const delta =
-                counted === "" ? null : Number(counted) - sys;
+              const delta = counted === "" ? null : Number(counted) - sys;
               return (
                 <tr key={item.name} className="hover:bg-bg/40">
                   <td className="px-4 py-2 font-medium">{item.name}</td>

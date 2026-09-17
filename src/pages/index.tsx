@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, ShoppingCart, Upload } from "lucide-react";
 import { useInventory } from "@/lib/inventory/store";
-import { SITES, type SiteId } from "@/lib/inventory/types";
-import { buildReorderList, isConsumable, stockStatus } from "@/lib/inventory/logic";
+import { SITES, isFoodDrink, isIceCream, type SiteId } from "@/lib/inventory/types";
+import { buildReorderList, stockStatus } from "@/lib/inventory/logic";
 import { formatQty } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/badge";
+
 
 export function Home() {
   const catalog = useInventory((s) => s.catalog);
@@ -20,8 +21,8 @@ export function Home() {
             On hand
           </h1>
           <p className="mt-2 max-w-xl text-muted">
-            Upload a POS export, recount the cooler, and build a Smart & Final list when
-            drinks or snacks drop below par.
+            Upload a ClubAutomation retail export, recount the cooler, and build a Smart &
+            Final list when drinks or snacks drop below par.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -44,6 +45,8 @@ export function Home() {
         ))}
       </div>
 
+      <IceCreamPanel />
+
       <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)] md:p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-xl font-medium">Needs ordering</h2>
@@ -55,7 +58,7 @@ export function Home() {
           {SITES.map((site) => {
             const snap = snapshots[site.id];
             const lines = snap
-              ? buildReorderList(catalog.filter(isConsumable), site.id, snap.rows)
+              ? buildReorderList(catalog.filter(isFoodDrink), site.id, snap.rows)
               : [];
             return (
               <div key={site.id}>
@@ -85,14 +88,64 @@ export function Home() {
   );
 }
 
+function IceCreamPanel() {
+  const catalog = useInventory((s) => s.catalog);
+  const snapshots = useInventory((s) => s.snapshots);
+  const items = catalog.filter(isIceCream);
+  if (items.length === 0) return null;
+
+  return (
+    <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)] md:p-6">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="font-display text-xl font-medium">Ice cream</h2>
+          <p className="mt-1 max-w-xl text-sm text-muted">
+            Separate vendor — shown here so you can see freezer stock. Not on Pars or the
+            Instacart list.
+          </p>
+        </div>
+        <Link to="/stock" className="text-sm text-accent">
+          View in stock
+        </Link>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {SITES.map((site) => {
+          const snap = snapshots[site.id];
+          let inStock = 0;
+          let units = 0;
+          for (const item of items) {
+            const qty = snap?.rows[item.name]?.qty ?? 0;
+            units += qty;
+            if (qty > 0) inStock += 1;
+          }
+          return (
+            <div key={site.id} className="rounded-md bg-bg px-4 py-3">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
+                {site.name}
+              </p>
+              <p className="mt-1 font-display text-2xl font-medium tabular-nums">
+                {inStock}
+                <span className="text-lg text-muted">/{items.length}</span>
+              </p>
+              <p className="text-sm text-muted">
+                flavors in stock · {formatQty(units)} units
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function SiteCard({ site, name }: { site: SiteId; name: string }) {
   const catalog = useInventory((s) => s.catalog);
   const snap = useInventory((s) => s.snapshots[site]);
-  const consumables = catalog.filter(isConsumable);
+  const food = catalog.filter(isFoodDrink);
   let out = 0;
   let reorder = 0;
   let ok = 0;
-  for (const item of consumables) {
+  for (const item of food) {
     const st = stockStatus(item, site, snap?.rows[item.name]);
     if (st === "OUT") out += 1;
     else if (st === "REORDER") reorder += 1;
@@ -106,7 +159,7 @@ function SiteCard({ site, name }: { site: SiteId; name: string }) {
       })
     : "No file";
 
-  const worst = consumables
+  const worst = food
     .map((item) => ({
       item,
       status: stockStatus(item, site, snap?.rows[item.name]),

@@ -26,7 +26,7 @@ function emptyRecount(): Record<SiteId, Record<string, RecountEntry>> {
 function applyDefaults(item: CatalogItem): CatalogItem {
   const pars = DEFAULT_PARS[item.name];
   const ice = item.category === "Ice Cream";
-  const consumable = item.category === "Snacks" || item.category === "Drinks" || ice;
+  const foodDrink = item.category === "Snacks" || item.category === "Drinks";
   const par: SitePar = ice
     ? { reorderPoint: 0, target: 0 }
     : pars
@@ -34,7 +34,7 @@ function applyDefaults(item: CatalogItem): CatalogItem {
       : { reorderPoint: 0, target: 0 };
   return {
     ...item,
-    orderChannel: consumable ? "instacart" : "none",
+    orderChannel: ice ? "vendor" : foodDrink ? "instacart" : "none",
     instacartQuery: INSTACART_QUERIES[item.name] || item.name,
     packSize: pars?.packSize || 1,
     sites: { bjk: { ...par }, eldo: { ...par } },
@@ -53,6 +53,8 @@ function mergeCsvIntoCatalog(catalog: CatalogItem[], rows: ParsedCsvRow[]): Cata
         itemNumber: r.itemNumber || existing.itemNumber,
         price: r.price || existing.price,
         cost: r.cost || existing.cost,
+        orderChannel:
+          (r.category || existing.category) === "Ice Cream" ? "vendor" : existing.orderChannel,
       });
     } else {
       byName.set(
@@ -181,12 +183,12 @@ export const useInventory = create<InventoryState>()(
         JSON.stringify({ version: 1, catalog: get().catalog, snapshots: get().snapshots }, null, 2),
       importBackup: (json) => {
         const data = JSON.parse(json) as { catalog?: CatalogItem[]; snapshots?: Record<SiteId, Snapshot> };
-        if (!data.catalog || !data.snapshots) throw new Error("Not a Court Stock backup.");
+        if (!data.catalog || !data.snapshots) throw new Error("Not a BTG Stock backup.");
         set({ catalog: data.catalog, snapshots: data.snapshots, samplesLoaded: true });
       },
     }),
     {
-      name: "court-stock-v1",
+      name: "btg-stock-v1",
       partialize: (s) => ({
         catalog: s.catalog,
         snapshots: s.snapshots,

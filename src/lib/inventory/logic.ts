@@ -7,7 +7,7 @@ import type {
   StockStatus,
   VarianceRow,
 } from "./types";
-import { CONSUMABLE_CATEGORIES } from "./types";
+import { isFoodDrink } from "./types";
 
 export function stockStatus(item: CatalogItem, site: SiteId, onHand?: OnHand): StockStatus {
   if (item.orderChannel === "none" || !item.trackQty) return "UNTRACKED";
@@ -29,7 +29,7 @@ export function orderQty(item: CatalogItem, site: SiteId, qty: number): number {
 }
 
 export function needsOrder(item: CatalogItem, site: SiteId, qty: number): boolean {
-  if (item.orderChannel === "none") return false;
+  if (item.orderChannel === "none" || item.orderChannel === "vendor") return false;
   const par = item.sites[site];
   if (!par || par.target <= 0) return false;
   return qty < par.reorderPoint;
@@ -76,6 +76,7 @@ export function instacartPayload(site: SiteId, lines: ReorderLine[]) {
     instructions: [
       "Prefer Smart & Final when available.",
       "Match quantities as closely as possible.",
+      "Ice cream is a separate vendor — do not add it here.",
     ],
     line_items: insta.map((l) => ({
       name: l.instacartQuery,
@@ -125,6 +126,7 @@ export function buildVariances(
   return rows;
 }
 
+/** @deprecated use isFoodDrink — kept so existing imports keep working */
 export function isConsumable(item: CatalogItem): boolean {
-  return CONSUMABLE_CATEGORIES.has(item.category);
+  return isFoodDrink(item);
 }

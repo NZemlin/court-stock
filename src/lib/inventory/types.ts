@@ -2,13 +2,36 @@ export type SiteId = "bjk" | "eldo";
 export type StockState = "available" | "out_of_stock" | "unavailable" | "unknown";
 export type OrderChannel = "instacart" | "vendor" | "none";
 export type StockStatus = "OUT" | "REORDER" | "LOW" | "OK" | "UNTRACKED";
+export type RecountScope = "desk" | "full";
 
 export const SITES: { id: SiteId; name: string; short: string }[] = [
   { id: "bjk", name: "BJK", short: "BJK" },
   { id: "eldo", name: "ELDO", short: "ELDO" },
 ];
 
-export const CONSUMABLE_CATEGORIES = new Set(["Snacks", "Drinks", "Ice Cream"]);
+/** Snacks & drinks — Instacart / Smart & Final par list. Ice cream is a separate vendor. */
+export const FOOD_DRINK_CATEGORIES = new Set(["Snacks", "Drinks"]);
+
+/** Walk-the-desk recount: small goods, not bags/shoes/racquets/apparel. */
+export const DESK_CATEGORIES = new Set(["String", "Snacks", "Drinks", "Ice Cream", "Balls"]);
+
+const APPAREL_NAME = /\b(hat|visor|hoodie|polo|cap|wristband)\b/i;
+const SKIP_DESK_NAME = /\b(labor|rental|hopper)\b/i;
+
+export function isFoodDrink(item: { category: string }): boolean {
+  return FOOD_DRINK_CATEGORIES.has(item.category);
+}
+
+export function isIceCream(item: { category: string }): boolean {
+  return item.category === "Ice Cream";
+}
+
+export function isDeskRecount(item: { name: string; category: string }): boolean {
+  if (SKIP_DESK_NAME.test(item.name)) return false;
+  if (DESK_CATEGORIES.has(item.category)) return true;
+  if (item.category === "Accessories" && !APPAREL_NAME.test(item.name)) return true;
+  return false;
+}
 
 export interface SitePar {
   reorderPoint: number;

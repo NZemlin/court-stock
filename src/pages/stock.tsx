@@ -3,13 +3,15 @@ import { SiteToggle } from "@/components/SiteToggle";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/badge";
 import { useInventory } from "@/lib/inventory/store";
-import type { SiteId, StockStatus } from "@/lib/inventory/types";
-import { isConsumable, stockStatus } from "@/lib/inventory/logic";
+import { isFoodDrink, isIceCream, type SiteId, type StockStatus } from "@/lib/inventory/types";
+import { stockStatus } from "@/lib/inventory/logic";
 import { formatQty } from "@/lib/utils";
 
-const FILTERS: { id: "all" | "food" | StockStatus; label: string }[] = [
+
+const FILTERS: { id: "all" | "food" | "ice" | StockStatus; label: string }[] = [
   { id: "all", label: "All" },
   { id: "food", label: "Food & drink" },
+  { id: "ice", label: "Ice cream" },
   { id: "OUT", label: "Out" },
   { id: "REORDER", label: "Reorder" },
   { id: "OK", label: "On par" },
@@ -30,8 +32,9 @@ export function StockPage() {
         status: stockStatus(item, site, snap?.rows[item.name]),
       }))
       .filter(({ item, status }) => {
-        if (filter === "food" && !isConsumable(item)) return false;
-        if (filter !== "all" && filter !== "food" && status !== filter) return false;
+        if (filter === "food" && !isFoodDrink(item)) return false;
+        if (filter === "ice" && !isIceCream(item)) return false;
+        if (filter !== "all" && filter !== "food" && filter !== "ice" && status !== filter) return false;
         if (query) {
           const q = query.toLowerCase();
           if (!item.name.toLowerCase().includes(q) && !item.category.toLowerCase().includes(q)) {

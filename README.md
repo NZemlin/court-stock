@@ -1,23 +1,28 @@
-# Court Stock
+# BTG Stock
 
-Pro shop inventory for **BJK** and **ELDO**. Upload a CourtReserve retail CSV, recount the cooler, set par levels, and build a Smart & Final / Instacart list.
+Bridge the Gap Tennis inventory for **BJK** and **ELDO**. Upload a ClubAutomation retail CSV, recount the desk, set par levels, and build a Smart & Final / Instacart list.
 
-**Bookmark the desk:** https://nzemlin.github.io/court-stock/
+Live site: **https://nzemlin.github.io/court-stock/**
 
-**Source:** https://github.com/NZemlin/court-stock
-
-Everything runs in the browser. CSVs and par levels stay on the device (localStorage). Nothing is sent to a server.
+Everything runs in the browser. CSVs and par levels stay on the device. Nothing is sent to a server.
 
 ## Use it
 
 1. Open the site on the desk computer or a tablet.
-2. **Upload** a retail items CSV. If the filename contains `bjk` or `eldo`, it is assigned automatically.
-3. **Order** lists items below par (rounded to pack size). Copy the paste list into Instacart.
-4. **Recount** — type counted quantities, then download the POS adjustment CSV for CourtReserve stock adjustment.
-5. **Pars** — edit min / target / pack size / Instacart search names. Export a backup JSON.
+2. **Upload** a ClubAutomation retail items CSV. If the filename contains `bjk` or `eldo`, it is assigned automatically.
+3. **Order** lists snacks and drinks below par (rounded to pack size). Copy the paste list into Instacart. Ice cream is a separate vendor and stays off this list.
+4. **Recount** — **Desk** counts strings, grips, dampeners, balls, food, drinks, ice cream, and sunscreen (not bags, shoes, or apparel). **Full shop** counts everything. Download the adjustment CSV for ClubAutomation.
+5. **Pars** — edit min / target / pack size / Instacart search names for food and drink. Ice cream is not on this page.
 
-The Sep 17, 2026 exports are seeded so you can try the desk before uploading a new file. Ice cream starts at target 0 (freezer off-season); set a target to bring it back.
+The Sep 17, 2026 exports are seeded so you can try the desk before uploading a new file.
 
-## How it deploys
+## Run locally
 
-Push to `main`. GitHub Actions builds the app and publishes the `gh-pages` branch. GitHub Pages serves that branch at `/court-stock/`.
+```bash
+npm install
+npm run dev
+```
+
+## GitHub Pages
+
+Push to `main`. The Actions workflow builds with `base: /court-stock/` and publishes the `gh-pages` branch.
