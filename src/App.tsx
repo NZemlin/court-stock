@@ -1,6 +1,7 @@
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AppShell } from "@/components/AppShell";
+import { SampleLoader } from "@/components/SampleLoader";
 import { Home } from "@/pages/index";
 import { UploadPage } from "@/pages/upload";
 import { ReorderPage } from "@/pages/reorder";
@@ -11,6 +12,7 @@ import { ParsPage } from "@/pages/pars";
 export function App() {
   return (
     <HashRouter>
+      <SampleLoader />
       <Routes>
         <Route element={<AppShell />}>
           <Route path="/" element={<Home />} />
