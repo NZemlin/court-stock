@@ -210,7 +210,7 @@ export const useInventory = create<InventoryState>()(
       },
     }),
     {
-      name: "btg-stock-v3",
+      name: "btg-stock-v4",
       version: 2,
       migrate: (persisted, version) => {
         const state = persisted as { catalog?: CatalogItem[] };
