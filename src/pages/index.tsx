@@ -102,8 +102,8 @@ function VendorPanel() {
         <div>
           <h2 className="font-display text-xl font-medium">Separate vendors</h2>
           <p className="mt-1 max-w-xl text-sm text-muted">
-            Ice cream, Barebells, LMNT, and NOCCO — on-hand totals only. Not on Pars or the
-            Instacart list.
+            Ice cream, Barebells, LMNT, NOCCO, and pickle bars — on-hand totals only. Not on Pars
+            or the Instacart list.
           </p>
         </div>
         <Link to="/stock" className="text-sm text-accent">
@@ -146,7 +146,7 @@ function VendorPanel() {
       {cooler.length > 0 ? (
         <div className={ice.length > 0 ? "mt-6" : "mt-4"}>
           <h3 className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
-            Barebells · LMNT · NOCCO
+            Barebells · LMNT · NOCCO · Pickle Bar
           </h3>
           <div className="mt-2 overflow-hidden rounded-md border border-border">
             <table className="w-full text-sm">

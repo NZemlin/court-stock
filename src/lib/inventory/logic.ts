@@ -78,7 +78,7 @@ export function instacartPayload(site: SiteId, lines: ReorderLine[]) {
     instructions: [
       "Prefer Smart & Final when available.",
       "Match quantities as closely as possible.",
-      "Ice cream, Barebells, LMNT, and NOCCO are separate vendors — do not add them here.",
+      "Ice cream, Barebells, LMNT, NOCCO, and pickle bars are separate vendors — do not add them here.",
     ],
     line_items: insta.map((l) => ({
       name: l.instacartQuery,

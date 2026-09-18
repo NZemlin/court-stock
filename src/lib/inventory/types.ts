@@ -17,13 +17,13 @@ export const DESK_CATEGORIES = new Set(["String", "Snacks", "Drinks", "Ice Cream
 
 const APPAREL_NAME = /\b(hat|visor|hoodie|polo|cap|wristband)\b/i;
 const SKIP_DESK_NAME = /\b(labor|rental|hopper)\b/i;
-const VENDOR_NAME = /\b(barebells|lmnt|nocco)\b/i;
+const VENDOR_NAME = /\b(barebells|lmnt|nocco|pickle bar)\b/i;
 
 export function isIceCream(item: { category: string }): boolean {
   return item.category === "Ice Cream";
 }
 
-/** Ice cream, Barebells, LMNT, NOCCO — not Instacart, not Pars. */
+/** Ice cream, Barebells, LMNT, NOCCO, pickle bars — not Instacart, not Pars. */
 export function isSeparateVendor(item: { name: string; category: string }): boolean {
   if (isIceCream(item)) return true;
   return VENDOR_NAME.test(item.name);

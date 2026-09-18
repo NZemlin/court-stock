@@ -48,8 +48,8 @@ export function ParsPage() {
         <h1 className="mt-1 font-display text-4xl font-medium tracking-tight">Par levels</h1>
         <p className="mt-2 max-w-2xl text-muted">
           Reorder when on-hand is below the point; order up to target, in pack-size multiples.
-          Ice cream, Barebells, LMNT, and NOCCO are separate vendors — totals live on the board,
-          not here.
+          Ice cream, Barebells, LMNT, NOCCO, and pickle bars are separate vendors — totals live
+          on the board, not here.
         </p>
       </header>
 

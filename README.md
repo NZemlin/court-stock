@@ -10,9 +10,9 @@ Everything runs in the browser. CSVs and par levels stay on the device. Nothing 
 
 1. Open the site on the desk computer or a tablet.
 2. **Upload** a ClubAutomation retail items CSV. If the filename contains `bjk` or `eldo`, it is assigned automatically.
-3. **Order** lists snacks and drinks below par (rounded to pack size). Copy the paste list into Instacart. Ice cream, Barebells, LMNT, and NOCCO are separate vendors and stay off this list.
+3. **Order** lists snacks and drinks below par (rounded to pack size). Copy the paste list into Instacart. Ice cream, Barebells, LMNT, NOCCO, and pickle bars are separate vendors and stay off this list.
 4. **Recount** — **Desk** counts strings, grips, dampeners, balls, food, drinks, ice cream, and sunscreen (not bags, shoes, or apparel). **Full shop** counts everything. Download the adjustment CSV for ClubAutomation.
-5. **Pars** — edit min / target / pack size / Instacart search names for food and drink. Ice cream, Barebells, LMNT, and NOCCO are not on this page.
+5. **Pars** — edit min / target / pack size / Instacart search names for food and drink. Ice cream, Barebells, LMNT, NOCCO, and pickle bars are not on this page.
 
 The Sep 17, 2026 exports are seeded so you can try the desk before uploading a new file.
 
