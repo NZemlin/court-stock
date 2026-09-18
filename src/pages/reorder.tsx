@@ -33,8 +33,8 @@ export function ReorderPage() {
           <h1 className="mt-1 font-display text-4xl font-medium tracking-tight">Order list</h1>
           <p className="mt-2 max-w-xl text-muted">
             Items below reorder point, rounded up to pack size. Copy the list into Instacart, or
-            download the payload if you have a developer key. Ice cream is a separate vendor and
-            stays off this list.
+            download the payload if you have a developer key. Ice cream, Barebells, LMNT, and
+            NOCCO are separate vendors and stay off this list.
           </p>
         </div>
         <SiteToggle value={site} onChange={setSite} />

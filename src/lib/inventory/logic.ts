@@ -10,7 +10,9 @@ import type {
 import { isFoodDrink } from "./types";
 
 export function stockStatus(item: CatalogItem, site: SiteId, onHand?: OnHand): StockStatus {
-  if (item.orderChannel === "none" || !item.trackQty) return "UNTRACKED";
+  if (item.orderChannel === "none" || item.orderChannel === "vendor" || !item.trackQty) {
+    return "UNTRACKED";
+  }
   const par = item.sites[site];
   if (!par || par.target <= 0) return "UNTRACKED";
   const qty = onHand?.qty ?? 0;
@@ -76,7 +78,7 @@ export function instacartPayload(site: SiteId, lines: ReorderLine[]) {
     instructions: [
       "Prefer Smart & Final when available.",
       "Match quantities as closely as possible.",
-      "Ice cream is a separate vendor — do not add it here.",
+      "Ice cream, Barebells, LMNT, and NOCCO are separate vendors — do not add them here.",
     ],
     line_items: insta.map((l) => ({
       name: l.instacartQuery,

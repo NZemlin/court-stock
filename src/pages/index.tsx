@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, ShoppingCart, Upload } from "lucide-react";
 import { useInventory } from "@/lib/inventory/store";
-import { SITES, isFoodDrink, isIceCream, type SiteId } from "@/lib/inventory/types";
+import { SITES, isFoodDrink, isIceCream, isSeparateVendor, type SiteId } from "@/lib/inventory/types";
 import { buildReorderList, stockStatus } from "@/lib/inventory/logic";
 import { formatQty } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/badge";
-
 
 export function Home() {
   const catalog = useInventory((s) => s.catalog);
@@ -45,7 +44,7 @@ export function Home() {
         ))}
       </div>
 
-      <IceCreamPanel />
+      <VendorPanel />
 
       <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)] md:p-6">
         <div className="mb-4 flex items-center justify-between">
@@ -88,19 +87,22 @@ export function Home() {
   );
 }
 
-function IceCreamPanel() {
+function VendorPanel() {
   const catalog = useInventory((s) => s.catalog);
   const snapshots = useInventory((s) => s.snapshots);
-  const items = catalog.filter(isIceCream);
-  if (items.length === 0) return null;
+  const ice = catalog.filter(isIceCream);
+  const cooler = catalog
+    .filter((i) => isSeparateVendor(i) && !isIceCream(i))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  if (ice.length === 0 && cooler.length === 0) return null;
 
   return (
     <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)] md:p-6">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="font-display text-xl font-medium">Ice cream</h2>
+          <h2 className="font-display text-xl font-medium">Separate vendors</h2>
           <p className="mt-1 max-w-xl text-sm text-muted">
-            Separate vendor — shown here so you can see freezer stock. Not on Pars or the
+            Ice cream, Barebells, LMNT, and NOCCO — on-hand totals only. Not on Pars or the
             Instacart list.
           </p>
         </div>
@@ -108,32 +110,79 @@ function IceCreamPanel() {
           View in stock
         </Link>
       </div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {SITES.map((site) => {
-          const snap = snapshots[site.id];
-          let inStock = 0;
-          let units = 0;
-          for (const item of items) {
-            const qty = snap?.rows[item.name]?.qty ?? 0;
-            units += qty;
-            if (qty > 0) inStock += 1;
-          }
-          return (
-            <div key={site.id} className="rounded-md bg-bg px-4 py-3">
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
-                {site.name}
-              </p>
-              <p className="mt-1 font-display text-2xl font-medium tabular-nums">
-                {inStock}
-                <span className="text-lg text-muted">/{items.length}</span>
-              </p>
-              <p className="text-sm text-muted">
-                flavors in stock · {formatQty(units)} units
-              </p>
-            </div>
-          );
-        })}
-      </div>
+
+      {ice.length > 0 ? (
+        <div className="mt-5">
+          <h3 className="text-xs font-medium uppercase tracking-[0.14em] text-muted">Ice cream</h3>
+          <div className="mt-2 grid gap-3 sm:grid-cols-2">
+            {SITES.map((site) => {
+              const snap = snapshots[site.id];
+              let inStock = 0;
+              let units = 0;
+              for (const item of ice) {
+                const qty = snap?.rows[item.name]?.qty ?? 0;
+                units += qty;
+                if (qty > 0) inStock += 1;
+              }
+              return (
+                <div key={site.id} className="rounded-md bg-bg px-4 py-3">
+                  <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
+                    {site.name}
+                  </p>
+                  <p className="mt-1 font-display text-2xl font-medium tabular-nums">
+                    {inStock}
+                    <span className="text-lg text-muted">/{ice.length}</span>
+                  </p>
+                  <p className="text-sm text-muted">
+                    flavors in stock · {formatQty(units)} units
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
+      {cooler.length > 0 ? (
+        <div className={ice.length > 0 ? "mt-6" : "mt-4"}>
+          <h3 className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
+            Barebells · LMNT · NOCCO
+          </h3>
+          <div className="mt-2 overflow-hidden rounded-md border border-border">
+            <table className="w-full text-sm">
+              <thead className="bg-bg text-xs uppercase tracking-wide text-muted">
+                <tr>
+                  <th className="px-4 py-2 text-left font-medium">Item</th>
+                  {SITES.map((s) => (
+                    <th key={s.id} className="px-4 py-2 text-right font-medium">
+                      {s.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {cooler.map((item) => (
+                  <tr key={item.name}>
+                    <td className="px-4 py-2.5 font-medium">{item.name}</td>
+                    {SITES.map((s) => {
+                      const qty = snapshots[s.id]?.rows[item.name]?.qty ?? 0;
+                      return (
+                        <td key={s.id} className="px-4 py-2.5 text-right">
+                          {qty <= 0 ? (
+                            <span className="text-muted">Out</span>
+                          ) : (
+                            <span className="font-mono tabular-nums">{formatQty(qty)}</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

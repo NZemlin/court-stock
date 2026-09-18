@@ -9,7 +9,7 @@ export const SITES: { id: SiteId; name: string; short: string }[] = [
   { id: "eldo", name: "ELDO", short: "ELDO" },
 ];
 
-/** Snacks & drinks — Instacart / Smart & Final par list. Ice cream is a separate vendor. */
+/** Snacks & drinks for Instacart / Smart & Final. Separate-vendor SKUs are excluded. */
 export const FOOD_DRINK_CATEGORIES = new Set(["Snacks", "Drinks"]);
 
 /** Walk-the-desk recount: small goods, not bags/shoes/racquets/apparel. */
@@ -17,13 +17,21 @@ export const DESK_CATEGORIES = new Set(["String", "Snacks", "Drinks", "Ice Cream
 
 const APPAREL_NAME = /\b(hat|visor|hoodie|polo|cap|wristband)\b/i;
 const SKIP_DESK_NAME = /\b(labor|rental|hopper)\b/i;
-
-export function isFoodDrink(item: { category: string }): boolean {
-  return FOOD_DRINK_CATEGORIES.has(item.category);
-}
+const VENDOR_NAME = /\b(barebells|lmnt|nocco)\b/i;
 
 export function isIceCream(item: { category: string }): boolean {
   return item.category === "Ice Cream";
+}
+
+/** Ice cream, Barebells, LMNT, NOCCO — not Instacart, not Pars. */
+export function isSeparateVendor(item: { name: string; category: string }): boolean {
+  if (isIceCream(item)) return true;
+  return VENDOR_NAME.test(item.name);
+}
+
+export function isFoodDrink(item: { name: string; category: string }): boolean {
+  if (isSeparateVendor(item)) return false;
+  return FOOD_DRINK_CATEGORIES.has(item.category);
 }
 
 export function isDeskRecount(item: { name: string; category: string }): boolean {
